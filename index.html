@@ -195,19 +195,20 @@
             .container { padding: 25px; }
             .stats { grid-template-columns: repeat(4, 1fr); }
             .reminder-grid { grid-template-columns: repeat(2, 1fr); }
-            .day-cell { min-height: 120px; padding: 10px; }
-            .task-label { font-size: 11px; }
-            .symptom-input { font-size: 11px; }
+            .card-content { padding: 30px; }
+            .date-number { font-size: 56px; }
+            .date-info { font-size: 18px; }
         }
 
         /* 大屏适配 */
         @media (min-width: 1024px) {
             .container { padding: 30px; }
             .header h1 { font-size: 24px; }
-            .day-cell { min-height: 130px; padding: 12px; }
-            .task-label { font-size: 12px; }
-            .symptom-input { font-size: 12px; }
-            .reminder-grid { grid-template-columns: repeat(2, 1fr); }
+            .card-content { padding: 35px; }
+            .date-number { font-size: 64px; }
+            .date-info { font-size: 20px; }
+            .reminder-grid { grid-template-columns: repeat(3, 1fr); }
+            .day-card { max-width: 600px; }
         }
     </style>
 </head>
@@ -216,7 +217,7 @@
         <div class="header">
             <h1>💝 妈妈调理计划追踪器</h1>
             <div style="background: #e0f2fe; padding: 8px; border-radius: 8px; margin: 10px 0; font-size: 12px; color: #0369a1;">
-                ✨ 所有专业调理预约已安排在周末，方便您的时间安排
+                ✨ 卡片模式：每次显示一天，点击"前一天/后一天"切换日期
             </div>
             <button class="export-btn" onclick="exportData()">📥 导出数据</button>
             <input type="file" id="importFile" accept=".json" onchange="importData()" style="display: none;">
@@ -288,11 +289,19 @@
                     <strong>茶饮推荐：</strong>百合莲子汤、玫瑰花茶、合欢皮茶、黄精炖梨水</p>
                 </div>
                 <div class="reminder-card" style="background: #fed7aa;">
-                    <h4>💾 使用提醒 & 目标</h4>
-                    <p><strong>备份提醒：</strong>定期点击"导出数据"备份<br>
+                    <h4>📱 使用提醒 & 操作指南</h4>
+                    <p><strong>卡片模式：</strong>每次显示一天，点击"前一天/后一天"切换<br>
+                    <strong>快速切换：</strong>可以跨月份无缝切换日期<br>
+                    <strong>数据备份：</strong>定期点击"导出数据"备份<br>
                     <strong>症状评分：</strong>0=无症状，5=中等，10=严重<br>
-                    <strong>冥想建议：</strong>小睡眠、冥想星球、Tide APP，每天10-20分钟<br>
                     <strong>调理目标：</strong>缓解焦虑躯体化症状，建立健康生活节律</p>
+                </div>
+                <div class="reminder-card" style="background: #dcfce7;">
+                    <h4>🧘 冥想练习 & 生活建议</h4>
+                    <p><strong>冥想APP：</strong>小睡眠、冥想星球、Tide APP<br>
+                    <strong>练习时间：</strong>每天10-20分钟，睡前或午休前<br>
+                    <strong>呼吸方法：</strong>腹式呼吸训练、正念呼吸<br>
+                    <strong>放松技巧：</strong>身体扫描放松法、深呼吸减压</p>
                 </div>
             </div>
         </div>
