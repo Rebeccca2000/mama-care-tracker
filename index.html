@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>妈妈调理计划追踪器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.6/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .container { max-width: 100%; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { 
+            Calendar, Check, Heart, Coffee, Flower, User, Clock, 
+            ChevronLeft, ChevronRight, Download, Upload, BarChart3, 
+            TrendingUp, AlertCircle 
+        } = lucide;
+
+        const AnxietyCareTracker = () => {
+            const [currentMonth, setCurrentMonth] = useState(6); // July = 6 (0-indexed)
+            const [currentYear, setCurrentYear] = useState(2025);
+            const [checkedItems, setCheckedItems] = useState({});
+            const [symptomData, setSymptomData] = useState({});
+            const [moodData, setMoodData] = useState({});
+
+            // 页面加载时从内存中恢复数据
+            useEffect(() => {
+                const savedData = window.trackerData || {};
+                if (savedData.checkedItems) setCheckedItems(savedData.checkedItems);
+                if (savedData.symptomData) setSymptomData(savedData.symptomData);
+                if (savedData.moodData) setMoodData(savedData.moodData);
+            }, []);
+
+            // 数据变化时保存到内存
+            useEffect(() => {
+                window.trackerData = { checkedItems, symptomData, moodData };
+            }, [checkedItems, symptomData, moodData]);
+
+            const months = [
+                '1月', '2月', '3月', '4月', '5月', '6月', 
+                '7月', '8月', '9月', '10月', '11月', '12月'
+            ];
+
+            const careActivities = {
+                daily: [
+                    { id: 'meditation', name: '冥想练习', color: 'bg-purple-100 text-purple-600', time: '10-20分钟' },
+                    { id: 'breakfast', name: '健康早餐', color: 'bg-yellow-100 text-yellow-600', time: '小米粥+山药' },
+                    { id: 'mood', name: '情绪记录', color: 'bg-pink-100 text-pink-600', time: '晚上' }
+                ],
+                monthly: {
+                    7: [
+                        { date: 6, type: 'tcm', name: '中医调理', location: '内蒙古自治区中医医院' },
+                        { date: 13, type: 'spa', name: '美容养生', location: '海伦多兰芳疗生活馆' },
+                        { date: 20, type: 'tcm', name: '中医调理', location: '内蒙古自治区中医医院' },
+                        { date: 20, type: 'psychology', name: '心理支持', location: '壹心理/简单心理' }
+                    ],
+                    8: [
+                        { date: 3, type: 'tcm', name: '中医调理', location: '内蒙古自治区中医医院' },
+                        { date: 10, type: 'spa', name: '美容养生', location: '玺悦SPA养生馆' },
+                        { date: 17, type: 'tcm', name: '中医调理', location: '内蒙古自治区中医医院' },
+                        { date: 15, type: 'psychology', name: '心理支持', location: '壹心理/简单心理' }
+                    ],
+                    9: [
+                        { date: 7, type: 'tcm', name: '中医调理', location: '内蒙古自治区中医医院' },
+                        { date: 15, type: 'spa', name: '美容养生', location: '海伦多兰芳疗生活馆' },
+                        { date: 21, type: 'tcm', name: '中医调理', location: '内蒙古自治区中医医院' },
+                        { date: 15, type: 'psychology', name: '心理支持', location: '壹心理/简单心理' }
+                    ],
+                    10: [
+                        { date: 5, type: 'tcm', name: '中医调理', location: '内蒙古自治区中医医院' },
+                        { date: 15, type: 'spa', name: '美容养生', location: '玺悦SPA养生馆' },
+                        { date: 19, type: 'tcm', name: '中医调理', location: '内蒙古自治区中医医院' },
+                        { date: 25, type: 'psychology', name: '心理支持', location: '壹心理/简单心理' }
+                    ],
+                    11: [
+                        { date: 2, type: 'tcm', name: '中医调理', location: '内蒙古自治区中医医院' },
+                        { date: 15, type: 'spa', name: '美容养生', location: '海伦多兰芳疗生活馆' },
+                        { date: 16, type: 'tcm', name: '中医调理', location: '内蒙古自治区中医医院' },
+                        { date: 15, type: 'psychology', name: '心理支持', location: '壹心理/简单心理' }
+                    ],
+                    12: [
+                        { date: 7, type: 'tcm', name: '中医调理', location: '内蒙古自治区中医医院' },
+                        { date: 15, type: 'spa', name: '美容养生', location: '玺悦SPA养生馆' },
+                        { date: 21, type: 'tcm', name: '中医调理', location: '内蒙古自治区中医医院' },
+                        { date: 15, type: 'psychology', name: '心理支持', location: '壹心理/简单心理' }
+                    ]
+                }
+            };
+
+            const exportData = () => {
+                const exportData = {
+                    checkedItems,
+                    symptomData,
+                    moodData,
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+                
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `妈妈调理数据_${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+            };
+
+            const importData = (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const importedData = JSON.parse(e.target.result);
+                            if (importedData.checkedItems) setCheckedItems(importedData.checkedItems);
+                            if (importedData.symptomData) setSymptomData(importedData.symptomData);
+                            if (importedData.moodData) setMoodData(importedData.moodData);
+                            alert('数据导入成功！');
+                        } catch (error) {
+                            alert('数据导入失败，请检查文件格式');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+
+            const getTypeColor = (type) => {
+                switch(type) {
+                    case 'tcm': return 'bg-green-100 text-green-600 border-green-200';
+                    case 'spa': return 'bg-blue-100 text-blue-600 border-blue-200';
+                    case 'psychology': return 'bg-purple-100 text-purple-600 border-purple-200';
+                    default: return 'bg-gray-100 text-gray-600 border-gray-200';
+                }
+            };
+
+            const handleDailyCheck = (date, activityId) => {
+                const key = `${currentYear}-${currentMonth}-${date}-${activityId}`;
+                setCheckedItems(prev => ({
+                    ...prev,
+                    [key]: !prev[key]
+                }));
+            };
+
+            const recordSymptom = (date, type, severity) => {
+                const key = `${currentYear}-${currentMonth}-${date}`;
+                setSymptomData(prev => ({
+                    ...prev,
+                    [key]: {
+                        ...prev[key],
+                        [type]: severity
+                    }
+                }));
+            };
+
+            const getDaysInMonth = (month, year) => {
+                return new Date(year, month + 1, 0).getDate();
+            };
+
+            const getMonthlyProgress = () => {
+                const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+                const totalTasks = daysInMonth * careActivities.daily.length;
+                const completedTasks = Object.keys(checkedItems).filter(key => {
+                    const [year, month] = key.split('-');
+                    return parseInt(year) === currentYear && parseInt(month) === currentMonth && checkedItems[key];
+                }).length;
+                
+                return Math.round((completedTasks / totalTasks) * 100);
+            };
+
+            const getSymptomStats = () => {
+                const currentMonthKeys = Object.keys(symptomData).filter(key => {
+                    const [year, month] = key.split('-');
+                    return parseInt(year) === currentYear && parseInt(month) === currentMonth;
+                });
+
+                const stomachPain = currentMonthKeys.map(key => symptomData[key]?.stomach || 0).filter(x => x > 0);
+                const heartPain = currentMonthKeys.map(key => symptomData[key]?.heart || 0).filter(x => x > 0);
+
+                return {
+                    stomachAvg: stomachPain.length ? (stomachPain.reduce((a, b) => a + b, 0) / stomachPain.length).toFixed(1) : 0,
+                    heartAvg: heartPain.length ? (heartPain.reduce((a, b) => a + b, 0) / heartPain.length).toFixed(1) : 0,
+                    recordDays: currentMonthKeys.length
+                };
+            };
+
+            const navigateMonth = (direction) => {
+                if (direction === 'prev') {
+                    if (currentMonth === 0) {
+                        setCurrentMonth(11);
+                        setCurrentYear(currentYear - 1);
+                    } else {
+                        setCurrentMonth(currentMonth - 1);
+                    }
+                } else {
+                    if (currentMonth === 11) {
+                        setCurrentMonth(0);
+                        setCurrentYear(currentYear + 1);
+                    } else {
+                        setCurrentMonth(currentMonth + 1);
+                    }
+                }
+            };
+
+            const progress = getMonthlyProgress();
+            const symptomStats = getSymptomStats();
+
+            return React.createElement('div', {
+                className: "max-w-7xl mx-auto p-3 sm:p-6 bg-gradient-to-br from-pink-50 to-purple-50 min-h-screen"
+            }, [
+                // 标题栏
+                React.createElement('div', {
+                    key: 'header',
+                    className: "bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6"
+                }, [
+                    React.createElement('div', {
+                        key: 'title-row',
+                        className: "flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6"
+                    }, [
+                        React.createElement('div', {
+                            key: 'title',
+                            className: "flex items-center space-x-3 mb-4 sm:mb-0"
+                        }, [
+                            React.createElement(Heart, { 
+                                key: 'heart-icon',
+                                className: "text-pink-500 w-6 h-6 sm:w-8 sm:h-8" 
+                            }),
+                            React.createElement('h1', {
+                                key: 'title-text',
+                                className: "text-xl sm:text-2xl font-bold text-gray-800"
+                            }, "妈妈调理计划追踪器")
+                        ]),
+                        React.createElement('div', {
+                            key: 'actions',
+                            className: "flex items-center space-x-2"
+                        }, [
+                            React.createElement('button', {
+                                key: 'export-btn',
+                                onClick: exportData,
+                                className: "p-2 hover:bg-gray-100 rounded-lg",
+                                title: "导出数据"
+                            }, React.createElement(Download, { className: "w-5 h-5 text-blue-600" })),
+                            React.createElement('label', {
+                                key: 'import-btn',
+                                className: "p-2 hover:bg-gray-100 rounded-lg cursor-pointer",
+                                title: "导入数据"
+                            }, [
+                                React.createElement(Upload, { 
+                                    key: 'upload-icon',
+                                    className: "w-5 h-5 text-green-600" 
+                                }),
+                                React.createElement('input', {
+                                    key: 'file-input',
+                                    type: "file",
+                                    accept: ".json",
+                                    onChange: importData,
+                                    className: "hidden"
+                                })
+                            ])
+                        ])
+                    ]),
+                    // 统计卡片
+                    React.createElement('div', {
+                        key: 'stats',
+                        className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
+                    }, [
+                        React.createElement('div', {
+                            key: 'progress-card',
+                            className: "bg-green-50 p-4 rounded-lg"
+                        }, [
+                            React.createElement('div', {
+                                key: 'progress-content',
+                                className: "flex items-center justify-between"
+                            }, [
+                                React.createElement('div', { key: 'progress-text' }, [
+                                    React.createElement('div', {
+                                        key: 'progress-label',
+                                        className: "text-sm text-gray-500"
+                                    }, "本月完成进度"),
+                                    React.createElement('div', {
+                                        key: 'progress-value',
+                                        className: "text-2xl font-bold text-green-600"
+                                    }, `${progress}%`)
+                                ])
+                            ])
+                        ]),
+                        React.createElement('div', {
+                            key: 'stomach-card',
+                            className: "bg-red-50 p-4 rounded-lg"
+                        }, [
+                            React.createElement('div', {
+                                key: 'stomach-label',
+                                className: "text-sm text-gray-500"
+                            }, "胃痛平均程度"),
+                            React.createElement('div', {
+                                key: 'stomach-value',
+                                className: "text-2xl font-bold text-red-600"
+                            }, `${symptomStats.stomachAvg}/10`)
+                        ]),
+                        React.createElement('div', {
+                            key: 'heart-card',
+                            className: "bg-orange-50 p-4 rounded-lg"
+                        }, [
+                            React.createElement('div', {
+                                key: 'heart-label',
+                                className: "text-sm text-gray-500"
+                            }, "心脏疼平均程度"),
+                            React.createElement('div', {
+                                key: 'heart-value',
+                                className: "text-2xl font-bold text-orange-600"
+                            }, `${symptomStats.heartAvg}/10`)
+                        ]),
+                        React.createElement('div', {
+                            key: 'days-card',
+                            className: "bg-blue-50 p-4 rounded-lg"
+                        }, [
+                            React.createElement('div', {
+                                key: 'days-label',
+                                className: "text-sm text-gray-500"
+                            }, "症状记录天数"),
+                            React.createElement('div', {
+                                key: 'days-value',
+                                className: "text-2xl font-bold text-blue-600"
+                            }, `${symptomStats.recordDays}天`)
+                        ])
+                    ]),
+                    // 月份导航
+                    React.createElement('div', {
+                        key: 'month-nav',
+                        className: "flex items-center justify-between"
+                    }, [
+                        React.createElement('button', {
+                            key: 'prev-btn',
+                            onClick: () => navigateMonth('prev'),
+                            className: "p-2 hover:bg-gray-100 rounded-lg"
+                        }, React.createElement(ChevronLeft, { className: "w-5 h-5" })),
+                        React.createElement('h2', {
+                            key: 'month-title',
+                            className: "text-lg sm:text-xl font-semibold text-gray-700"
+                        }, `${currentYear}年 ${months[currentMonth]}`),
+                        React.createElement('button', {
+                            key: 'next-btn',
+                            onClick: () => navigateMonth('next'),
+                            className: "p-2 hover:bg-gray-100 rounded-lg"
+                        }, React.createElement(ChevronRight, { className: "w-5 h-5" }))
+                    ])
+                ]),
+                // 日历
+                React.createElement('div', {
+                    key: 'calendar',
+                    className: "bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6"
+                }, [
+                    React.createElement('h3', {
+                        key: 'calendar-title',
+                        className: "text-lg font-semibold text-gray-700 mb-4 flex items-center"
+                    }, [
+                        React.createElement(Calendar, { 
+                            key: 'calendar-icon',
+                            className: "w-5 h-5 mr-2" 
+                        }),
+                        "每日打卡日历"
+                    ]),
+                    React.createElement('div', {
+                        key: 'weekdays',
+                        className: "grid grid-cols-7 gap-1 sm:gap-2 mb-4"
+                    }, ['日', '一', '二', '三', '四', '五', '六'].map(day => 
+                        React.createElement('div', {
+                            key: day,
+                            className: "text-center text-xs sm:text-sm font-medium text-gray-500 p-2"
+                        }, day)
+                    )),
+                    React.createElement('div', {
+                        key: 'days-grid',
+                        className: "grid grid-cols-7 gap-1 sm:gap-2"
+                    }, Array.from({ length: getDaysInMonth(currentMonth, currentYear) }, (_, i) => {
+                        const date = i + 1;
+                        const dailyCompletion = careActivities.daily.filter(activity => {
+                            const key = `${currentYear}-${currentMonth}-${date}-${activity.id}`;
+                            return checkedItems[key];
+                        }).length;
+                        
+                        const completionRate = (dailyCompletion / careActivities.daily.length) * 100;
+                        
+                        const todayAppointments = (careActivities.monthly[currentMonth + 1] || []).filter(
+                            appointment => appointment.date === date
+                        );
+
+                        const symptomKey = `${currentYear}-${currentMonth}-${date}`;
+                        const todaySymptoms = symptomData[symptomKey] || {};
+                        
+                        return React.createElement('div', {
+                            key: date,
+                            className: "border rounded-lg p-1 sm:p-2 min-h-24 sm:min-h-40 hover:bg-gray-50"
+                        }, [
+                            React.createElement('div', {
+                                key: 'date-header',
+                                className: "flex justify-between items-start mb-1 sm:mb-2"
+                            }, [
+                                React.createElement('span', {
+                                    key: 'date-number',
+                                    className: "text-xs sm:text-sm font-medium"
+                                }, date),
+                                completionRate === 100 && React.createElement(Check, {
+                                    key: 'completion-check',
+                                    className: "w-3 h-3 sm:w-4 sm:h-4 text-green-500"
+                                })
+                            ]),
+                            // 预约显示
+                            todayAppointments.length > 0 && React.createElement('div', {
+                                key: 'appointments',
+                                className: "space-y-1 mb-1 sm:mb-2"
+                            }, todayAppointments.map((appointment, idx) =>
+                                React.createElement('div', {
+                                    key: idx,
+                                    className: `text-xs p-1 rounded font-medium ${getTypeColor(appointment.type)}`
+                                }, [
+                                    appointment.name,
+                                    React.createElement('div', {
+                                        key: 'location',
+                                        className: "text-xs opacity-75 mt-0.5 truncate"
+                                    }, appointment.location.includes('内蒙古') ? '中医医院' : appointment.location.split('·')[0])
+                                ])
+                            )),
+                            // 症状记录
+                            React.createElement('div', {
+                                key: 'symptoms',
+                                className: "space-y-1 mb-1 sm:mb-2"
+                            }, [
+                                React.createElement('div', {
+                                    key: 'stomach-input',
+                                    className: "flex items-center justify-between"
+                                }, [
+                                    React.createElement('span', {
+                                        key: 'stomach-label',
+                                        className: "text-xs text-gray-500"
+                                    }, "胃痛"),
+                                    React.createElement('select', {
+                                        key: 'stomach-select',
+                                        value: todaySymptoms.stomach || 0,
+                                        onChange: (e) => recordSymptom(date, 'stomach', parseInt(e.target.value)),
+                                        className: "text-xs w-12 p-0.5 rounded border"
+                                    }, [0,1,2,3,4,5,6,7,8,9,10].map(i =>
+                                        React.createElement('option', { key: i, value: i }, i)
+                                    ))
+                                ]),
+                                React.createElement('div', {
+                                    key: 'heart-input',
+                                    className: "flex items-center justify-between"
+                                }, [
+                                    React.createElement('span', {
+                                        key: 'heart-label',
+                                        className: "text-xs text-gray-500"
+                                    }, "心脏疼"),
+                                    React.createElement('select', {
+                                        key: 'heart-select',
+                                        value: todaySymptoms.heart || 0,
+                                        onChange: (e) => recordSymptom(date, 'heart', parseInt(e.target.value)),
+                                        className: "text-xs w-12 p-0.5 rounded border"
+                                    }, [0,1,2,3,4,5,6,7,8,9,10].map(i =>
+                                        React.createElement('option', { key: i, value: i }, i)
+                                    ))
+                                ])
+                            ]),
+                            // 每日任务
+                            React.createElement('div', {
+                                key: 'daily-tasks',
+                                className: "space-y-1"
+                            }, careActivities.daily.map(activity => {
+                                const key = `${currentYear}-${currentMonth}-${date}-${activity.id}`;
+                                const isChecked = checkedItems[key];
+                                
+                                return React.createElement('button', {
+                                    key: activity.id,
+                                    onClick: () => handleDailyCheck(date, activity.id),
+                                    className: `w-full text-xs p-0.5 sm:p-1 rounded text-left transition-colors ${
+                                        isChecked 
+                                            ? 'bg-green-100 text-green-700 line-through' 
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`
+                                }, activity.name);
+                            }))
+                        ]);
+                    }))
+                ]),
+                // 提醒区域
+                React.createElement('div', {
+                    key: 'reminders',
+                    className: "bg-white rounded-2xl shadow-lg p-4 sm:p-6"
+                }, [
+                    React.createElement('h3', {
+                        key: 'reminders-title',
+                        className: "text-lg font-semibold text-gray-700 mb-4"
+                    }, "💝 贴心提醒"),
+                    React.createElement('div', {
+                        key: 'reminders-grid',
+                        className: "grid grid-cols-1 md:grid-cols-2 gap-4 text-sm"
+                    }, [
+                        React.createElement('div', {
+                            key: 'backup-reminder',
+                            className: "bg-blue-50 p-4 rounded-lg"
+                        }, [
+                            React.createElement('h4', {
+                                key: 'backup-title',
+                                className: "font-medium text-blue-800 mb-2"
+                            }, "💾 数据备份重要提醒"),
+                            React.createElement('p', {
+                                key: 'backup-text',
+                                className: "text-blue-700"
+                            }, "请定期点击"导出数据"按钮备份记录，避免数据丢失。可发送给医生查看调理效果。")
+                        ]),
+                        React.createElement('div', {
+                            key: 'scoring-reminder',
+                            className: "bg-red-50 p-4 rounded-lg"
+                        }, [
+                            React.createElement('h4', {
+                                key: 'scoring-title',
+                                className: "font-medium text-red-800 mb-2"
+                            }, "📊 症状评分说明"),
+                            React.createElement('p', {
+                                key: 'scoring-text',
+                                className: "text-red-700"
+                            }, "0分=无症状，5分=中等程度，10分=非常严重。请每天如实记录胃痛和心脏疼程度。")
+                        ]),
+                        React.createElement('div', {
+                            key: 'meditation-reminder',
+                            className: "bg-green-50 p-4 rounded-lg"
+                        }, [
+                            React.createElement('h4', {
+                                key: 'meditation-title',
+                                className: "font-medium text-green-800 mb-2"
+                            }, "🧘 冥想练习建议"),
+                            React.createElement('p', {
+                                key: 'meditation-text',
+                                className: "text-green-700"
+                            }, "使用小睡眠、冥想星球或Tide APP，专注腹式呼吸，每天10-20分钟")
+                        ]),
+                        React.createElement('div', {
+                            key: 'goal-reminder',
+                            className: "bg-purple-50 p-4 rounded-lg"
+                        }, [
+                            React.createElement('h4', {
+                                key: 'goal-title',
+                                className: "font-medium text-purple-800 mb-2"
+                            }, "🎯 调理目标"),
+                            React.createElement('p', {
+                                key: 'goal-text',
+                                className: "text-purple-700"
+                            }, "缓解焦虑躯体化症状，改善胃痛心脏疼，建立健康生活节律")
+                        ])
+                    ])
+                ]),
+                // 安全提示
+                React.createElement('div', {
+                    key: 'safety-notice',
+                    className: "mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
+                }, React.createElement('div', {
+                    className: "flex items-start space-x-2"
+                }, [
+                    React.createElement(AlertCircle, {
+                        key: 'alert-icon',
+                        className: "w-5 h-5 text-yellow-600 mt-0.5"
+                    }),
+                    React.createElement('div', {
+                        key: 'safety-text',
+                        className: "text-sm text-yellow-800"
+                    }, [
+                        React.createElement('strong', { key: 'safety-title' }, "数据安全提示："),
+                        "此追踪器的数据保存在当前浏览器中。为防止数据丢失，请：",
+                        React.createElement('br', { key: 'br1' }),
+                        "• 定期使用"导出数据"功能备份",
+                        React.createElement('br', { key: 'br2' }),
+                        "• 保存备份文件到手机相册或云盘",
+                        React.createElement('br', { key: 'br3' }),
+                        "• 换设备时使用"导入数据"恢复记录"
+                    ])
+                ]))
+            ]);
+        };
+
+        ReactDOM.render(React.createElement(AnxietyCareTracker), document.getElementById('root'));
+    </script>
+</body>
+</html>
